@@ -39,5 +39,45 @@ def llegada_procesos(env, RAM, CPU, tiempos_procesos):
         num_proceso += 1
         env.process(proceso(env, f"Proceso {num_proceso}", RAM, CPU, tiempos_procesos, tiempo_inicio))
 
+def proceso(env, nombre, RAM, CPU, tiempos_procesos, tiempo_inicio):
+    instrucciones_totales = random.randint(1, 10)
+    memoria_necesaria = random.randint(1, 10)
+
+    print(str(nombre) +"  Solicitando " + str(memoria_necesaria) + " de RAM en tiempo " + str(env.now) )
+    yield RAM.get(memoria_necesaria)
+
+    print(str(nombre) +" Asignando " + str(memoria_necesaria) + " de RAM en tiempo " + str(env.now))
+    instrucciones_restantes = instrucciones_totales 
+
+    while instrucciones_restantes > 0:
+        with CPU.request() as req:
+            print(str(nombre) +" Solicitando ejecución del CPU en tiempo " + str(env.now))
+            yield req
+
+            print(str(nombre) +" Obteniendo ejecución del CPU  en tiempo " + str(env.now))
+            yield env.timeout(1)  # Simular 1 unidad de tiempo de CPU
+            instrucciones_restantes -= instrucciones_CPU
+
+            if instrucciones_restantes <= 0:
+                tiempo_fin = env.now
+                tiempo_proceso = tiempo_fin - tiempo_inicio
+                print(str(nombre) +" Proceso completado en tiempo " + str(env.now))
+                tiempos_procesos.append(tiempo_proceso)
+                break
+
+            print(str(nombre) +"  Procesando en CPU en tiempo " + str(env.now))
+            esperar = random.randint(1, 2)
+
+            if esperar == 1:
+                tiempo_esperar = random.randint(1, 10)
+                print(str(nombre) +"  Esperando por I/O durante " + str(tiempo_esperar) + " unidades de tiempo en t: " + str(env.now))
+                yield env.timeout(tiempo_esperar)
+            elif esperar == 2:
+                print(str(nombre) +"  Listo para ejecutar (ir a ready) nuevamente en t: " + str(env.now))
+                continue
+
+    print(str(nombre) +" Proceso terminado, liberando " + str(memoria_necesaria) + " de RAM en tiempo " + str(env.now))
+    yield RAM.put(memoria_necesaria)
+
 if __name__ == '__main__':
     main()
