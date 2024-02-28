@@ -31,6 +31,13 @@ def main():
     print(f"Desviación estándar: {desviacion_estandar}")
     return tiempo_promedio, desviacion_estandar
 
+def llegada_procesos(env, RAM, CPU, tiempos_procesos):
+    num_proceso = 0
+    while True:
+        tiempo_inicio = env.now  # Se actualiza con cada nuevo proceso
+        yield env.timeout(random.expovariate(1.0 / intervalo_creacion_procesos))
+        num_proceso += 1
+        env.process(proceso(env, f"Proceso {num_proceso}", RAM, CPU, tiempos_procesos, tiempo_inicio))
 
 if __name__ == '__main__':
     main()
