@@ -24,6 +24,12 @@ def main():
         CPU = simpy.Resource(env, capacity=1)
         env.process(llegada_procesos(env, RAM, CPU, tiempos_procesos))
         env.run(until=1000)  # Tiempo de simulación más largo
+    tiempo_promedio = np.mean(tiempos_procesos)
+    desviacion_estandar = np.std(tiempos_procesos)
+    print(f"Para {num_procesos} procesos:")
+    print(f"Tiempo promedio: {tiempo_promedio}")
+    print(f"Desviación estándar: {desviacion_estandar}")
+    return tiempo_promedio, desviacion_estandar
 
 
 if __name__ == '__main__':
